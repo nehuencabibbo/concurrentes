@@ -1,6 +1,7 @@
 mod resource;
 mod villager;
 
+use crate::constants::TIME_TO_SHOW_PROGRESS;
 use std::{
     collections::HashMap, sync::{Arc, RwLock}, thread, time::Duration
 };
@@ -34,15 +35,16 @@ impl Village {
         let _: Vec<_> = (0..self.villagers)
         .map(|villager_number| {
             let total_gold_clone = Arc::clone(self.gold());
+            let total_resources_clone = Arc::clone(self.resources());
             thread::spawn(move || {
                 let villager = Villager::new(villager_number);
-                villager.work(total_gold_clone);
+                villager.work(total_gold_clone, total_resources_clone);
             })
         })
         .collect();
 
         loop {
-            thread::sleep(Duration::from_secs(3));
+            thread::sleep(TIME_TO_SHOW_PROGRESS);
             self.show_progress();
         }
     } 
@@ -55,7 +57,7 @@ impl Village {
         &self.gold
     }
 
-    pub fn resources(&self) -> &RwLock<HashMap<String, usize>> {
+    pub fn resources(&self) -> &Arc<RwLock<HashMap<String, usize>>> {
         &self.resources
     }
 }

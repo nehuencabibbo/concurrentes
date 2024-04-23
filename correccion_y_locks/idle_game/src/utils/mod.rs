@@ -3,9 +3,13 @@ use rand::Rng;
 
 
 pub fn coin_flip() -> usize {
-    rand::thread_rng().gen_range(0..=1)
+    random_number_in(0, 1)
 }
 
 pub fn extract_gold() -> usize {
-    rand::thread_rng().gen_range(MIN_GOLD..=MAX_GOLD)
+    random_number_in(MIN_GOLD, MAX_GOLD)
+}
+
+pub fn random_number_in(start: usize, finish: usize) -> usize {
+    rand::thread_rng().gen_range(start..=finish)
 }
