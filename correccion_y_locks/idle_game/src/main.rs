@@ -1,3 +1,5 @@
+use idle_game::village::Village;
+
 fn main() {
-    let oro = 0;
+    Village::new(5).start_activity();
 }
