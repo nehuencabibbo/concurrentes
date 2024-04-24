@@ -1,9 +1,15 @@
 type VillagerNumber = usize;
 
-
 use std::{collections::HashMap, sync::{Arc, RwLock}, thread, time::Duration};
 
-use crate::{utils::{coin_flip, extract_gold, random_number_in}, village::resource::Resource};
+use crate::{
+    utils::{
+        coin_flip, 
+        extract_gold
+    }, 
+    village::resource::Resource
+};
+
 pub enum Villager {
     Productor(VillagerNumber),
     Consumer(VillagerNumber),
@@ -54,8 +60,13 @@ impl Villager {
 
     fn consumer_work(villager_number: usize) {
         loop {
-            println!("[ALDEANO {villager_number}] Soy consumidor y no hice nada");
-
+            if coin_flip() == 0 {
+                println!("[ALDEANO {villager_number}] Soy consumidor y no hice nada");
+                //Combinar recursos en oro
+            } else {
+                todo!()
+                //Consumir recursos
+            }
             thread::sleep(Duration::from_secs(1));
         }
     }

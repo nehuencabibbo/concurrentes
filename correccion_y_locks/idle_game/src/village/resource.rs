@@ -57,5 +57,9 @@ impl Resource {
 
         name
     }
+
+    pub fn combine_resources(a_resource: Resource, another_resource: Resource) -> usize {
+        a_resource.cost() + another_resource.cost() + random_number_in(-100 as isize, 300 as isize) as usize
+    }
 }
 
