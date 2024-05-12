@@ -16,7 +16,7 @@ pub fn barbero() {
     //esta libre o no, cuando un cliente la toma, va a quedar en 0, haciendo que el resto de clientes esten
     //esperando por ella. El que indica cuando se libera la silla va a tener que ser el barbero, o sea que 
     //cuando el barbero termine de realizar el corte de pelo, va a liberar la silla 
-    let silla_de_barbero = Arc::new(Semaphore::new(1));
+    let silla_de_barbero = Arc::new(Semaphore::new(0));
 
     //Cada cliente tiene que saber cuando le terminan de cortar el pelo, para ello uso otro semaforo, al cual el barbero
     //va a indicar que termino de cortar el pelo, y el cliente va a estar esperando a que el barbero indique que ya termino
@@ -27,15 +27,42 @@ pub fn barbero() {
     let silla_de_barbero_barbero = silla_de_barbero.clone();
     let corte_listo_barbero = corte_listo.clone();
 
-    std::thread::spawn(move || {
+    
+    
+    for i in 1..=CANTIDAD_DE_CLIENTES {
+        let sala_de_espera_cliente = sala_de_espera.clone();
+        let silla_de_barbero_cliente = silla_de_barbero.clone();
+        let corte_listo_cliente = corte_listo.clone();
+        
+        std::thread::spawn(move || {
+            println!("[CLIENTE {}] se sento en la sala de espera", i);
+            //Le indico al barbero que llegue a la sala de espera
+            sala_de_espera_cliente.release();
+            
+            println!("[CLEINTE {}] esta esperando al barbero", i);
+            //Intento sentarme en la silla del barbero, si no puedo porque hay alguien mas,
+            //espero a que se libere
+            silla_de_barbero_cliente.acquire();
+            
+            println!("[CLIENTE {}] le estan cortando el pelo", i);
+            //Tengo que esperar a que el barbero termine de cortarme el pelo
+            corte_listo_cliente.acquire();
+            
+            println!("[CLIENTE {}] le terminaron de cortar el pelo", i);
+        });
+    }
+    
+    //Se puede poner arriba y da igual, en verdad tiene mas sentido, pero
+    //asi el output es mas lindo
+    let handle = std::thread::spawn(move || {
         loop {
-            println!("[BARBERO] Arranque a laburar");
+            println!("[BARBERO] Esperando clientes");
             //Atiendo a un cliente si es que tengo alguno, sino me quedo esperando por clientes
             sala_de_espera_barbero.acquire();
 
-            println!("[BARBERO] Voy a cortar el pelo");
+            println!("[BARBERO] Voy a cortarle el pelo a alguien");
             //Como obtuve un cliente, ahora le corto el pelo
-            std::thread::sleep(std::time::Duration::from_secs(3));
+            std::thread::sleep(std::time::Duration::from_secs(1));
 
             println!("[BARBERO] Termine de cortar el pelo");
             //Una vez que termine de cortar el pelo, tengo que indicarle al cliente que termine de cortarle el pelo
@@ -45,27 +72,7 @@ pub fn barbero() {
         }
     });
 
-
-    for i in 0..CANTIDAD_DE_CLIENTES {
-        let sala_de_espera_cliente = sala_de_espera.clone();
-        let silla_de_barbero_cliente = silla_de_barbero.clone();
-        let corte_listo_cliente = corte_listo.clone();
-
-        std::thread::spawn(move || {
-            println!("[CLIENTE {}] se sento en la sala de espera", i);
-            //Le indico al barbero que llegue a la sala de espera
-            sala_de_espera_cliente.release();
-
-            println!("[CLEINTE {}] esta esperando al barbero", i);
-            //Intento sentarme en la silla del barbero, si no puedo porque hay alguien mas,
-            //espero a que se libere
-            silla_de_barbero_cliente.acquire();
-
-            println!("[CLIENTE {}] le estan cortando el pelo", i);
-            //Tengo que esperar a que el barbero termine de cortarme el pelo
-            corte_listo_cliente.acquire();
-            
-            println!("[CLIENTE {}] le terminaron de cortar el pelo", i);
-        });
-    }
+    //Si no se hace esto, cuando termina la funcion (tira los 200 clientes)
+    //muere el thread del barbero de una
+    handle.join().unwrap();
 }
