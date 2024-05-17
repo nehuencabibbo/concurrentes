@@ -1,7 +1,7 @@
 use std::{pin::Pin, time::Duration};
 use async_std::task;
 
-
+use std::sync::Barrier;
 use futures::join;
 
 async fn hello() -> String {
@@ -23,5 +23,6 @@ async fn async_main() -> String {
 }
 
 fn main() {
+    let a = Barrier::new(5);
     println!("{}", task::block_on(async_main()));
 }

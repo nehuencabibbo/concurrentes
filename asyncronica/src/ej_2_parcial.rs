@@ -1,5 +1,5 @@
 use std::task;
-
+use std::sync::Barrier;
 //Leer archivo 100 lineas, c/linea sitio (URL)
 
 fn leer_archivos() {
